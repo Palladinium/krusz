@@ -26,6 +26,8 @@ const HELP: &str = r#"
   VvVvVvVvVvVvVvVvVvVvVvVvVvVvV
                 ♪
   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+A tiny utility to bitcrush sounds.
 "#;
 
 #[derive(StructOpt)]
