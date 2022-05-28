@@ -1,6 +1,6 @@
 [package]
 name = "krusz"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Patrick Chieppe <patrick.chieppe@hotmail.com>"]
 edition = "2021"
 
