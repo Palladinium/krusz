@@ -2,18 +2,17 @@
 name = "crush"
 version = "0.1.0"
 authors = ["Patrick Chieppe <patrick.chieppe@hotmail.com>"]
-edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+edition = "2021"
 
 [profile.release]
 lto = "yes"
 codegen-units = 1
 
 [dependencies]
-rodio = "0.9.0"
+rodio = "0.15.0"
 hound = "3.4.0"
 structopt = "0.3.3"
-anyhow = "1.0.19"
 clap = "2.33.0"
-num = "0.2.0"
+num = "0.4.0"
+eyre = "0.6.8"
+color-eyre = "0.6.1"

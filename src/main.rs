@@ -5,24 +5,23 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use anyhow::Error as AnyHow;
-use anyhow::{bail, ensure};
 use clap::{arg_enum, AppSettings};
+use color_eyre::eyre::{bail, ensure, Result};
 use hound::{SampleFormat, WavSpec, WavWriter};
 use num::NumCast;
-use rodio::{buffer::SamplesBuffer, decoder::Decoder, Sink, Source};
+use rodio::{buffer::SamplesBuffer, decoder::Decoder, OutputStream, Sink, Source};
 use structopt::StructOpt;
 
 const HELP: &str = r#"
-           ||||||||||
-           ||||||||||
-           ||||||||||
-           ||||||||||
-           ||||||||||
-           ||||||||||
-           ||||||||||
-           ||||||||||
-  ╔═══════════════════════════╗
+           ││││││││││
+           ││││││││││
+           ││││││││││
+           ││││││││││
+           ││││││││││
+           ││││││││││
+           ││││││││││
+           ││││││││││
+  ╔════════╧╧╧╧╧╧╧╧╧╧═════════╗
   ║                           ║
   VvVvVvVvVvVvVvVvVvVvVvVvVvVvV
                 ♪
@@ -64,6 +63,25 @@ struct Sound {
 }
 
 impl Sound {
+    fn new<S: Iterator<Item = i16> + Source>(mut source: S) -> Self {
+        let channels_count: usize = source.channels().try_into().unwrap();
+        let samples: Vec<i16> = source.by_ref().collect();
+
+        Self {
+            channels: (0..channels_count)
+                .map(|i| Channel {
+                    samples: samples
+                        .iter()
+                        .skip(i)
+                        .step_by(channels_count)
+                        .copied()
+                        .collect(),
+                })
+                .collect(),
+            sample_rate: source.sample_rate(),
+        }
+    }
+
     fn to_source(&self) -> SamplesBuffer<i16> {
         let c = self.channels.len();
 
@@ -84,28 +102,9 @@ struct Channel {
     samples: Vec<i16>,
 }
 
-impl Sound {
-    fn new<S: Iterator<Item = i16> + Source>(mut source: S) -> Self {
-        let channels_count: usize = source.channels().try_into().unwrap();
-        let samples: Vec<i16> = source.by_ref().collect();
+fn main() -> Result<()> {
+    color_eyre::install()?;
 
-        Self {
-            channels: (0..channels_count)
-                .map(|i| Channel {
-                    samples: samples
-                        .iter()
-                        .skip(i)
-                        .step_by(channels_count)
-                        .copied()
-                        .collect(),
-                })
-                .collect(),
-            sample_rate: source.sample_rate(),
-        }
-    }
-}
-
-fn main() -> Result<(), AnyHow> {
     let opts = Opts::from_args();
 
     let sample_rate = opts.sample_rate.unwrap_or(44100);
@@ -139,12 +138,12 @@ fn main() -> Result<(), AnyHow> {
 
     let play_sound = sound.clone();
 
-    let sink = if opts.play {
-        let sink = Sink::new(&rodio::default_output_device().unwrap());
-
+    let play_handles = if opts.play {
+        let (stream, stream_handle) = OutputStream::try_default()?;
+        let sink = Sink::try_new(&stream_handle)?;
         sink.append(play_sound.to_source().buffered());
 
-        Some(sink)
+        Some((stream, sink))
     } else {
         None
     };
@@ -163,7 +162,7 @@ fn main() -> Result<(), AnyHow> {
         }
     }
 
-    if let Some(sink) = sink {
+    if let Some((_, sink)) = play_handles {
         sink.sleep_until_end();
     }
 
@@ -214,10 +213,9 @@ fn lerp<T: Copy + std::fmt::Debug + NumCast>(
     f: f64,
     interpolation: Interpolation,
 ) -> f64 {
-    assert!(values.len() > 0);
-    assert!(f >= 0.0);
+    assert!(!values.is_empty());
     assert!(
-        f <= values.len() as f64,
+        f >= 0.0 && f < values.len() as f64,
         "Lerp index {} out of range: 0..{}",
         f,
         values.len()
@@ -276,7 +274,7 @@ fn requantize_sample(sample: i16, bit_depth: u8) -> i16 {
     (sample & hi_mask) | (fill & lo_mask)
 }
 
-fn save_wav<P: AsRef<Path>>(sound: &Sound, path: P) -> Result<(), AnyHow> {
+fn save_wav<P: AsRef<Path>>(sound: &Sound, path: P) -> Result<()> {
     let spec = WavSpec {
         channels: sound.channels.len() as u16,
         sample_rate: 44100,
