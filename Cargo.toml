@@ -1,6 +1,7 @@
 [package]
 name = "krusz"
 version = "1.0.0"
+description = "A tiny utility to bitcrush sounds"
 authors = ["Patrick Chieppe <patrick.chieppe@hotmail.com>"]
 edition = "2021"
 
