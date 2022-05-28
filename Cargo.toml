@@ -1,5 +1,5 @@
 [package]
-name = "crush"
+name = "krusz"
 version = "0.1.0"
 authors = ["Patrick Chieppe <patrick.chieppe@hotmail.com>"]
 edition = "2021"

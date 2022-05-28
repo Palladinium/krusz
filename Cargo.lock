@@ -273,19 +273,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "crush"
-version = "0.1.0"
-dependencies = [
- "clap",
- "color-eyre",
- "eyre",
- "hound",
- "num",
- "rodio",
- "structopt",
-]
-
-[[package]]
 name = "darling"
 version = "0.13.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -429,6 +416,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "671a26f820db17c2a2750743f1dd03bafd15b98c9f30c7c2628c024c05d73397"
 dependencies = [
  "wasm-bindgen",
+]
+
+[[package]]
+name = "krusz"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "color-eyre",
+ "eyre",
+ "hound",
+ "num",
+ "rodio",
+ "structopt",
 ]
 
 [[package]]

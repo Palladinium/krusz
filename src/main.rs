@@ -29,17 +29,17 @@ const HELP: &str = r#"
 "#;
 
 #[derive(StructOpt)]
-#[structopt(name = "CRUSH", about = HELP, setting = AppSettings::ArgRequiredElseHelp)]
+#[structopt(name = "KRUSZ", about = HELP, setting = AppSettings::ArgRequiredElseHelp)]
 struct Opts {
-    /// The input file to CRUSH
+    /// The input file to KRUSZ
     #[structopt(short, long, parse(from_os_str))]
     input: PathBuf,
 
-    /// The output CRUSHED file. Supported formats: WAV
+    /// The output KRUSZED file. Supported formats: WAV
     #[structopt(short, long, parse(from_os_str))]
     output: Option<PathBuf>,
 
-    /// Play the CRUSHED sound
+    /// Play the KRUSZED sound
     #[structopt(short, long)]
     play: bool,
 
@@ -129,7 +129,7 @@ fn main() -> Result<()> {
     );
 
     if bit_depth == 16 && sample_rate == 44100 {
-        println!("Warning: Neither bit depth nor sample rate are being CRUSHED");
+        println!("Warning: Neither bit depth nor sample rate are being KRUSZED");
     }
 
     sound = resample(sound, sample_rate, interpolation);
