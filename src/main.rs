@@ -10,7 +10,6 @@ use color_eyre::eyre::{bail, ensure, Result};
 use hound::{SampleFormat, WavSpec, WavWriter};
 use num::NumCast;
 use rodio::{buffer::SamplesBuffer, decoder::Decoder, OutputStream, Sink, Source};
-use strum::EnumString;
 
 const HELP: &str = r#"
            ││││││││││
@@ -54,7 +53,7 @@ struct Opts {
     sample_rate: Option<u32>,
 
     /// Interpolation method for resampling. Available: Nearest, Linear. Default: Nearest
-    #[structopt(long)]
+    #[structopt(arg_enum, long)]
     interpolation: Option<Interpolation>,
 }
 
@@ -171,7 +170,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-#[derive(Clone, Copy, Debug, ArgEnum, EnumString)]
+#[derive(Clone, Copy, Debug, ArgEnum)]
 enum Interpolation {
     Nearest,
     Linear,
@@ -265,11 +264,9 @@ fn requantize_sample(sample: i16, bit_depth: u8) -> i16 {
 
     let hi_mask = !0 << (16 - bit_depth);
     let lo_mask = !hi_mask;
-    let fill: i16 = if sample & (1 << (15 - bit_depth)) < 0 {
-        0
-    } else {
-        i16::max_value()
-    };
+
+    let msb = sample & (1 << 15);
+    let fill: i16 = if msb == 0 { !0 } else { 0 };
 
     (sample & hi_mask) | (fill & lo_mask)
 }
