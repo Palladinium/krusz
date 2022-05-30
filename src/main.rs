@@ -273,15 +273,15 @@ fn requantize_sample(sample: i16, bit_depth: u8) -> i16 {
 
 fn save_wav<P: AsRef<Path>>(sound: &Sound, path: P) -> Result<()> {
     let spec = WavSpec {
-        channels: sound.channels.len() as u16,
+        channels: sound.channels.len().try_into().unwrap(),
         sample_rate: 44100,
         bits_per_sample: 16,
         sample_format: SampleFormat::Int,
     };
 
     let mut writer = WavWriter::create(path, spec)?;
-    let n = sound.channels[0].samples.len();
-    let mut i16_writer = writer.get_i16_writer(n as u32);
+    let n = sound.channels[0].samples.len() * sound.channels.len();
+    let mut i16_writer = writer.get_i16_writer(n.try_into().unwrap());
 
     for sample in sound.to_source() {
         i16_writer.write_sample(sample);
