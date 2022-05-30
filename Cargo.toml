@@ -12,8 +12,10 @@ codegen-units = 1
 [dependencies]
 rodio = "0.15.0"
 hound = "3.4.0"
-structopt = "0.3.3"
-clap = "2.33.0"
 num = "0.4.0"
 eyre = "0.6.8"
 color-eyre = "0.6.1"
+clap = { version = "3.1.18", features = ["derive"] }
+features = "0.10.0"
+derive = "1.0.0"
+strum = { version = "0.24.0", features = ["derive"] }

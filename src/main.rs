@@ -5,12 +5,12 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use clap::{arg_enum, AppSettings};
+use clap::{ArgEnum, Parser};
 use color_eyre::eyre::{bail, ensure, Result};
 use hound::{SampleFormat, WavSpec, WavWriter};
 use num::NumCast;
 use rodio::{buffer::SamplesBuffer, decoder::Decoder, OutputStream, Sink, Source};
-use structopt::StructOpt;
+use strum::EnumString;
 
 const HELP: &str = r#"
            ││││││││││
@@ -30,8 +30,8 @@ const HELP: &str = r#"
 A tiny utility to bitcrush sounds.
 "#;
 
-#[derive(StructOpt)]
-#[structopt(name = "KRUSZ", about = HELP, setting = AppSettings::ArgRequiredElseHelp)]
+#[derive(Parser)]
+#[structopt(name = "KRUSZ", about = HELP, arg_required_else_help = true)]
 struct Opts {
     /// The input file to KRUSZ
     #[structopt(short, long, parse(from_os_str))]
@@ -107,7 +107,7 @@ struct Channel {
 fn main() -> Result<()> {
     color_eyre::install()?;
 
-    let opts = Opts::from_args();
+    let opts = Opts::parse();
 
     let sample_rate = opts.sample_rate.unwrap_or(44100);
     let bit_depth = opts.bit_depth.unwrap_or(16);
@@ -171,12 +171,10 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-arg_enum! {
-    #[derive(Clone, Copy, Debug)]
-    enum Interpolation {
-        Nearest,
-        Linear,
-    }
+#[derive(Clone, Copy, Debug, ArgEnum, EnumString)]
+enum Interpolation {
+    Nearest,
+    Linear,
 }
 
 fn resample(sound: Sound, sample_rate: u32, interpolation: Interpolation) -> Sound {
